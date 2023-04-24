@@ -1,0 +1,29 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "level_1.tmx": {
+            "scale": 2.1889583333333333,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 240.75378319215758,
+                "y": 165.83230227467405
+            }
+        }
+    },
+    "map.fixedSize": true,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 60,
+    "openFiles": [
+    ],
+    "project": "hungry_cat_2.tiled-project",
+    "recentFiles": [
+    ]
+}
