@@ -1,28 +1,26 @@
 module HungryCatTwo
   ROOT_PATH = File.expand_path("../..", __FILE__)
-  TILE_SIZE = 16
+  DESIGN_RESOLUTION_WIDTH = 1080
 
   class Window < CyberarmEngine::Window
-    attr_reader :spritesheet
+    attr_reader :spritesheet, :collision_data
 
     def setup
       self.caption = "Hungry Cat 2 / Gosu Game Jam 4"
 
-      @spritesheet = Gosu::Image.load_tiles("#{ROOT_PATH}/media/spritesheet.png", TILE_SIZE, TILE_SIZE, retro: true)
-      @spritesheet.freeze
-
-      @i = 56
+      @level = Level.new(tmx: "#{ROOT_PATH}/tiled/level_1.tmx")
     end
 
     def draw
       super
 
-      Gosu.draw_rect(0, 0, width, height, 0xff_252525)
+      @level.draw
+    end
 
-      @spritesheet[@i].draw(0, 0, 0, 4, 4)
-      @i += 1
-      @i = 56 if @i > 58
-      sleep 0.1
+    def update
+      super
+
+      @level.update(0.016)
     end
   end
 end

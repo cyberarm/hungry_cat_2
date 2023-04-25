@@ -1,22 +1,20 @@
 
-class Taco
-  attr_reader :sprite, :position
-  def initialize(game_state:, x:, y:, z:, sprite: 42)
-    @game_state = game_state
-    @context = game_state.context
-    @position = Entity::Vector.new(x, y, z)
-    @sprite = sprite
+module HungryCatTwo
+  class Taco < Entity
+    def setup
+      @sprite = 42
+      @offset = 0
+      @offset_range = 0.005
+      @limiter = 200.0
+    end
 
-    @offset_range = 2.0
-    @offset = 0
-    @limiter = 250.0
-  end
+    def sprite
+      @sprite
+    end
 
-  def draw
-    @context.sprite(sprite, @position.x, @position.y + @offset, @position.z)
-  end
-
-  def update(dt)
-    @offset = Math.cos(@context.milliseconds / @limiter) * @offset_range
+    def update(dt)
+      @offset = Math.cos(Gosu.milliseconds / @limiter) * @offset_range
+      @position.y += @offset
+    end
   end
 end
