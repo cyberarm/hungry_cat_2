@@ -12,7 +12,7 @@ module HungryCatTwo
       @sprite
     end
 
-    def update(dt)
+    def update(dt, input)
       @offset = Math.cos(Gosu.milliseconds / @limiter) * @offset_range
       @position.y += @offset
     end

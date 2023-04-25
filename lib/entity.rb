@@ -2,12 +2,14 @@ module HungryCatTwo
   class Entity
     GRAVITY = 9.8
 
-    attr_reader :position, :velocity, :speed, :sprite, :sprites
+    attr_reader :position, :velocity, :speed, :sprite, :sprites, :base_sprite
     def initialize(level:, x: 0, y: 0, z: 0, speed: 10, base_sprite: 0)
       @level = level
       @speed = speed
       @position = CyberarmEngine::Vector.new(x, y, z)
       @velocity = CyberarmEngine::Vector.new(0, 0)
+
+      @base_sprite = base_sprite
 
       @drag = 0.9
 
@@ -66,16 +68,18 @@ module HungryCatTwo
       Level::SPRITESHEET[sprite].draw(@position.x * Level::TILE_SIZE, @position.y * Level::TILE_SIZE, @position.z)
     end
 
-    def update(dt)
-      return
+    def update(dt, input)
+      # return
 
-      collision_detector
+      # collision_detector
 
       @position.x += @velocity.x
       @position.y -= @velocity.y
 
       @velocity.x *= @drag
       @velocity.x = 0 if @velocity.x.abs < 0.05
+
+      return
 
       if on_ground?
         @position.y = ground.y - 15

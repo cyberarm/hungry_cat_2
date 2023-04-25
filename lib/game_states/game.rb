@@ -56,22 +56,6 @@ module HungryCatTwo
       next_level?
     end
 
-    def dogs
-      @entities.select { |ent| ent.is_a?(Dog) }
-    end
-
-    def tacos
-      @entities.select { |ent| ent.is_a?(Taco) }
-    end
-
-    def flag
-      @entities.find { |ent| ent.is_a?(Flag) }
-    end
-
-    def eat_taco(taco)
-      @entities.delete(taco)
-    end
-
     def setup_level
       @entities.clear
       create_and_position_entities(Flag, 49) # Flags
@@ -107,11 +91,6 @@ module HungryCatTwo
 
       @cat.position.x = cat.x
       @cat.position.y = cat.y
-    end
-
-    def center_around(entity, lag = Entity::Vector.new(0.9, 0.9))
-      @offset.x += ((entity.position.x - @context.width  / 2) - @offset.x) * (1.0 - lag.x)
-      @offset.y += ((entity.position.y - @context.height / 2) - @offset.y) * (1.0 - lag.y)
     end
 
     def debug_draw

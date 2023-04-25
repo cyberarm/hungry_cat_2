@@ -8,7 +8,7 @@ module HungryCatTwo
       @sit_time = 750
     end
 
-    def update(dt)
+    def update(dt, input)
       super
 
       return

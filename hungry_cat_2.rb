@@ -6,6 +6,7 @@ end
 
 require_relative "lib/window"
 require_relative "lib/level"
+require_relative "lib/input"
 
 require_relative "lib/entity"
 require_relative "lib/entities/flag"

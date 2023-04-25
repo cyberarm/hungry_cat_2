@@ -28,15 +28,17 @@ module HungryCatTwo
       end
     end
 
-    def update(dt)
+    def update(dt, input)
       @direction = @velocity.x > 0 ? 1 : -1
 
       super
 
-      return
+      if input
+        @velocity.x += @speed * dt if input.right?
+        @velocity.x -= @speed * dt if input.left?
+      end
 
-      @velocity.x += @speed * dt if @context.button?("right")
-      @velocity.x -= @speed * dt if @context.button?("left")
+      return
 
       if on_ground?
         @velocity.y = @jump if @context.button?("up") or @context.button?("x")
