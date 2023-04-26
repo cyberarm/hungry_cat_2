@@ -3,24 +3,26 @@ module HungryCatTwo
   DESIGN_RESOLUTION_WIDTH = 1080
 
   class Window < CyberarmEngine::Window
-    attr_reader :spritesheet, :collision_data
+    attr_reader :scale, :levels
 
     def setup
       self.caption = "Hungry Cat 2 / Gosu Game Jam 4"
 
-      @level = Level.new(tmx: "#{ROOT_PATH}/tiled/level_1.tmx")
-    end
+      @scale = 3 * (width.to_f / HungryCatTwo::DESIGN_RESOLUTION_WIDTH)
 
-    def draw
-      super
+      @levels = 1
+      while File.exist?("#{ROOT_PATH}/tiled/level_#{@levels}.tmx")
+        @levels += 1
+      end
+      @levels -= 1
 
-      @level.draw
+      push_state(HungryCatGameTransition, current_level: 1, cat_lives: 3)
     end
 
     def update
-      super
+      @scale = 3 * (width.to_f / HungryCatTwo::DESIGN_RESOLUTION_WIDTH)
 
-      @level.update(0.016)
+      super
     end
   end
 end

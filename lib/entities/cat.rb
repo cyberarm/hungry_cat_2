@@ -13,11 +13,6 @@ module HungryCatTwo
       @visible = true
 
       @last_touched_tile = nil
-      @lowest_point = -Float::INFINITY
-
-      # @game_state.level.each do |tile|
-        # @lowest_point = tile.y if @lowest_point < tile.y
-      # end
     end
 
     def draw
@@ -38,11 +33,7 @@ module HungryCatTwo
         @velocity.x -= @speed * dt if input.left?
       end
 
-      return
-
-      if on_ground?
-        @velocity.y = @jump if @context.button?("up") or @context.button?("x")
-      end
+      @velocity.y = @jump if input.jump? && on_ground?
 
       tile = ground
       @last_touched_tile = ground if tile
@@ -63,9 +54,9 @@ module HungryCatTwo
     end
 
     def evade_dogs
-      @game_state.dogs.find do |dog|
-        if @context.sprite_vs_sprite(sprite, @position.x, @position.y, dog.sprite, dog.position.x, dog.position.y)
-          edges = @context.colliding_edge(sprite, @position.x, @position.y, dog.sprite, dog.position.x, dog.position.y)
+      @level.dogs.find do |dog|
+        if @level.entity_vs_entity(self, dog)
+          edges = @level.colliding_edge(self, dog)
           unless edges[:top] && @position.y <= dog.position.y + 4
             lose_life
           end
@@ -77,14 +68,14 @@ module HungryCatTwo
     end
 
     def collect_tacos
-      @game_state.tacos.each do |taco|
-        @game_state.eat_taco(taco) if @context.sprite_vs_sprite(sprite, @position.x, @position.y, taco.sprite, taco.position.x, taco.position.y)
+      @level.tacos.each do |taco|
+        @level.eat_taco(taco) if @level.entity_vs_entity(self, taco)
       end
     end
 
     def fell_out_of_level?
-      if @position.y > @lowest_point + @context.height
-        @position.y = @last_touched_tile.y - (16 * @jump)
+      if @position.y > @level.lowest_point + @level.window.height
+        @position.y = @last_touched_tile.position.y - (16 * @jump)
         @velocity.y = 0
 
         lose_life
@@ -111,7 +102,7 @@ module HungryCatTwo
     end
 
     def die?
-      @context.game_state = HungryCatGameOver.new(@context) if @lives <= 0
+      @lives <= 0
     end
   end
 end

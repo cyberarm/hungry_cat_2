@@ -2,8 +2,8 @@ module HungryCatTwo
   class Entity
     GRAVITY = 9.8
 
-    attr_reader :position, :velocity, :speed, :sprite, :sprites, :base_sprite
-    def initialize(level:, x: 0, y: 0, z: 0, speed: 10, base_sprite: 0)
+    attr_reader :position, :velocity, :speed, :sprites, :base_sprite
+    def initialize(level:, x: 0, y: 0, z: 0, speed: 10.0, base_sprite: 0)
       @level = level
       @speed = speed
       @position = CyberarmEngine::Vector.new(x, y, z)
@@ -34,7 +34,10 @@ module HungryCatTwo
 
       @collisions = []
 
-      setup if defined?(setup)
+      setup
+    end
+
+    def setup
     end
 
     def sprite
@@ -65,29 +68,27 @@ module HungryCatTwo
     end
 
     def draw
-      Level::SPRITESHEET[sprite].draw(@position.x * Level::TILE_SIZE, @position.y * Level::TILE_SIZE, @position.z)
+      Level::SPRITESHEET[sprite].draw(@position.x, @position.y, @position.z)
     end
 
     def update(dt, input)
-      # return
+      collision_detector
 
-      # collision_detector
+      unless @static
+        @position.x += @velocity.x
+        @position.y -= @velocity.y
 
-      @position.x += @velocity.x
-      @position.y -= @velocity.y
+        @velocity.x *= @drag
+        @velocity.x = 0 if @velocity.x.abs < 0.05
 
-      @velocity.x *= @drag
-      @velocity.x = 0 if @velocity.x.abs < 0.05
-
-      return
-
-      if on_ground?
-        @position.y = ground.y - 15
-        @velocity.y = 0
-      else
-        @velocity.y -= GRAVITY * dt
-        @velocity.y = GRAVITY if @velocity.y > GRAVITY
-        @velocity.y = -GRAVITY if @velocity.y < -GRAVITY
+        if on_ground?
+          @position.y = ground.position.y - 15
+          @velocity.y = 0
+        else
+          @velocity.y -= GRAVITY * dt
+          @velocity.y = GRAVITY if @velocity.y > GRAVITY
+          @velocity.y = -GRAVITY if @velocity.y < -GRAVITY
+        end
       end
 
       animate
@@ -103,9 +104,9 @@ module HungryCatTwo
     end
 
     def on_ground?
-      if floor = ground
-        @position.y >= floor.y - 15
-      end
+      return false unless (floor = ground)
+
+      @position.y >= floor.position.y - 15
     end
 
     def ground(ground_sprite_start = 56, ground_sprite_end = 58)
@@ -115,7 +116,7 @@ module HungryCatTwo
     def collision_detector
       ground_tiles = [56, 57, 58]
 
-      @collisions = @context.sprite_vs_level(sprite, @position.x, @position.y, @game_state.current_level).select do |collision|
+      @collisions = @level.sprite_vs_level(sprite, @position).select do |collision|
         collision.sprite.between?(ground_tiles.first, ground_tiles.last)
       end
     end

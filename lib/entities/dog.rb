@@ -1,7 +1,7 @@
 module HungryCatTwo
   class Dog < Entity
     def setup
-      @speed = 3.5
+      @speed = 7.5
       @direction = 1
 
       @sat_at = Gosu.milliseconds
@@ -11,33 +11,26 @@ module HungryCatTwo
     def update(dt, input)
       super
 
-      return
+      return unless Gosu.milliseconds > @sat_at + @sit_time
 
-      if Gosu.milliseconds > @sat_at + @sit_time
-        @velocity.x += (@speed * dt) * @direction
+      @velocity.x += (@speed * dt) * @direction
 
-        change_direction?
-      end
+      change_direction?
     end
 
     def change_direction?
-      unless ground_ahead?
-        @direction *= -1
+      return if ground_ahead?
 
-        @velocity.x = 0
-        @sat_at = Gosu.milliseconds
-      end
+      @direction *= -1
+
+      @velocity.x = 0
+      @sat_at = Gosu.milliseconds
     end
 
     def ground_ahead?
-      x = @velocity.x > 0 ? @position.x.floor / 16 + 1 : @position.x.floor / 16
+      x = @velocity.x.positive? ? @position.x.floor / Level::TILE_SIZE + 1 : @position.x.floor / Level::TILE_SIZE
 
-      floor = @game_state.level.find do |sprite|
-        (sprite.x.floor / 16).floor == x.floor &&
-        (sprite.y.floor / 16).floor == (@position.y.floor / 16 + 1).floor
-      end
-
-      return floor
+      @level.tile(x, position.y.floor / Level::TILE_SIZE + 1) != -1
     end
   end
 end

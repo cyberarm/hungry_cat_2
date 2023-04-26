@@ -1,102 +1,60 @@
 module HungryCatTwo
-  class HungryCatGame < GameState
+  class Game < GameState
     attr_reader :current_level, :context, :level
 
-    def setup
-      @current_level = @options[:current_level]
+    def initialize(*args)
+      super
 
-      @level = @context.levels[@current_level].sort_by {|sprite| sprite.z}.map do |sprite|
-        if RUBY_ENGINE == "opal"
-          # Struct.dup is broken it seems...
-          AuthorEngine::Sprite.new(sprite.sprite, sprite.x, sprite.y, sprite.z)
-        else
-          sprite.dup
-        end
-      end
+      @current_level = @options[:current_level] || 1
 
-      @offset = CyberarmEngine::Vector.new(0, 0)
-
-      @entities = []
-      @cat = Cat.new(game_state: self, base_sprite: 14)
-      @cat.lives = @options[:cat_lives]
-
-      setup_level
+      @level = Level.new(tmx: "#{ROOT_PATH}/tiled/level_#{@current_level}.tmx", cat_lives: @options[:cat_lives])
     end
 
     def draw
-      @context.rect(0, 0, @context.width, @context.height, @context.light_gray)
+      super
 
-      @context.translate(-@offset.x, -@offset.y) do
-        @level.each do |sprite|
-          @context.sprite(sprite.sprite, sprite.x, sprite.y, sprite.z)
+      return unless @level
+      @level.draw
+
+      Gosu.scale(window.scale) do
+        @level.cat.lives.times do |i|
+          Level::SPRITESHEET[Level::CAT_HEAD].draw(10 * i, 10, 10)
         end
 
-        @entities.each(&:draw)
-        @cat.draw
-
-        debug_draw
+        @level.tacos.size.times do |i|
+          Level::SPRITESHEET[Level::TACO].draw(10 * i, 10 + 10, 10)
+        end
       end
-
-      tacos.size.times do |i|
-        @context.sprite(42, -3 + (9 * i), -3)
-      end
-
-      @cat.lives.times do |i|
-        @context.sprite(27, -4 + (6 * i), 8)
-      end
-      @context.text("levels: #{@current_level + 1} of #{@context.levels.size} fps: #{@context.fps}, delta time: #{@context.dt}", 1, 1, 6, 0, @context.dark_gray)
     end
 
-    def update(dt)
-      @entities.each { |entity| entity.update(dt) }
-      @cat.update(dt)
+    def update
+      super
 
-      center_around(@cat)
+      return unless @level
+
+      @level.update(window.dt)
+
+      push_state(HungryCatGameOver) if @level.cat.die?
 
       next_level?
-    end
-
-    def setup_level
-      @entities.clear
-      create_and_position_entities(Flag, 49) # Flags
-      create_and_position_entities(Taco, 42) # Tacos
-      create_and_position_entities(Dog,  00) # Dogs
-      position_cat
-    end
-
-    def next_level?
-      if tacos.size == 0 && @context.sprite_vs_sprite(@cat.sprite, @cat.position.x, @cat.position.y, flag.sprite, flag.position.x, flag.position.y)
-        if @current_level < @context.levels.size - 1
-          @context.game_state = HungryCatGameTransition.new(@context, current_level: @current_level + 1, cat_lives: @cat.lives + 1)
-        else
-          @context.game_state = HungryCatGameComplete.new(@context)
-        end
-      end
-    end
-
-    def create_and_position_entities(klass, sprite_id)
-      entity = @level.select { |sprite| sprite.sprite == sprite_id}
-
-      entity.each do |spawner|
-        @level.delete(spawner) # Remove spawner
-
-        @entities << klass.new(game_state: self, x: spawner.x, y: spawner.y, z: spawner.z)
-      end
-    end
-
-    def position_cat
-      cat = @level.detect { |sprite| sprite.sprite == 14}
-
-      @level.delete(cat) # Remove cat spawner
-
-      @cat.position.x = cat.x
-      @cat.position.y = cat.y
     end
 
     def debug_draw
       if @debug
         @context.draw_level_boxes(@current_level)
         @context.draw_sprite_box(@cat.sprite, @cat.position.x, @cat.position.y)
+      end
+    end
+
+    def next_level?
+      return unless @level.tacos.size.zero? && @level.entity_vs_entity(@level.cat, @level.flag)
+
+      puts window.levels
+
+      if @current_level < window.levels
+        push_state(HungryCatGameTransition, current_level: @current_level + 1, cat_lives: @level.cat.lives + 1)
+      else
+        push_state(HungryCatGameComplete)
       end
     end
   end

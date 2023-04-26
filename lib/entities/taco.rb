@@ -4,7 +4,7 @@ module HungryCatTwo
     def setup
       @sprite = 42
       @offset = 0
-      @offset_range = 0.005
+      @offset_range = 0.05
       @limiter = 200.0
     end
 

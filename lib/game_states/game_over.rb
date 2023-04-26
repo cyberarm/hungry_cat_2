@@ -1,49 +1,16 @@
 module HungryCatTwo
   class HungryCatGameOver < HungryCatGameFinished
     def draw
-      @context.rect(0, 0, @context.width, @context.height, @context.dark_purple)
-      @context.text("Here there be dragons...", 0 , 0, 11)
+      Gosu.draw_rect(0, 0, window.width, window.height, dark_purple)
+      # @context.text("Here there be dragons...", 0, 0, 11)
 
-      @context.sprite(18, @context.width / 2 - 28, @context.height / 2 - 8)
-      @context.sprite(4, @context.width / 2 - 8, @context.height / 2 - 5)
-      @context.sprite(4, @context.width / 2 + 9, @context.height / 2 - 7)
+      Gosu.scale(window.scale, window.scale, window.width / 2, window.height / 2) do
+        Level::SPRITESHEET[18].draw(window.width / 2 - 28, window.height / 2 - 8)
+        Level::SPRITESHEET[4].draw(window.width / 2 - 8, window.height / 2 - 5)
+        Level::SPRITESHEET[4].draw(window.width / 2 + 9, window.height / 2 - 7)
+      end
 
       draw_animated_message("Press 'Y' to try again.")
-    end
-  end
-
-  class HungryCatGameTransition < GameState
-    def setup
-      @started_at = Gosu.milliseconds
-      @transition_time = 2_000
-      @start_animation = 1_000
-      @offset = 0
-
-      @current_level = @options[:current_level]
-      @new_level = HungryCatGame.new(@context, current_level: @current_level, cat_lives: @options[:cat_lives])
-    end
-
-    def draw
-      if Gosu.milliseconds > @started_at + @start_animation
-        @new_level.draw
-      end
-
-      @context.rect(0, -@offset, @context.width, @context.height, @context.dark_gray)
-      @context.text("Level #{@current_level + 1}", 0, (@context.height / 2 - 8) + -@offset, 16)
-    end
-
-    def update(dt)
-      if Gosu.milliseconds > @started_at + @start_animation
-        time_elapsed = (Gosu.milliseconds - @started_at) - @start_animation
-        animation_time = (@transition_time - @start_animation).to_f
-
-        ratio = time_elapsed / animation_time
-        @offset = @context.width * ratio
-      end
-
-      if Gosu.milliseconds > @started_at + @transition_time
-        @context.game_state = @new_level
-      end
     end
   end
 end
