@@ -163,9 +163,9 @@ module HungryCatTwo
       end
 
       input = Input.new
-      input.jump = Gosu.button_down?(Gosu::KB_SPACE) || Gosu.button_down?(Gosu::KB_W) || Gosu.button_down?(Gosu::KB_UP)
-      input.left = Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)
-      input.right = Gosu.button_down?(Gosu::KB_D) || Gosu.button_down?(Gosu::KB_RIGHT)
+      input.jump = [Gosu::KB_SPACE, Gosu::KB_W, Gosu::KB_UP, Gosu::GP_DPAD_UP].any? { |key| Gosu.button_down?(key) }
+      input.left = [Gosu::KB_A, Gosu::KB_LEFT, Gosu::GP_LEFT].any? { |key| Gosu.button_down?(key) }
+      input.right = [Gosu::KB_D, Gosu::KB_RIGHT, Gosu::GP_RIGHT].any? { |key| Gosu.button_down?(key) }
 
       CyberarmEngine::Stats.frame.start_timing(:custom_physics_timestep)
       physics(dt, input)
