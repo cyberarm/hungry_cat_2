@@ -23,4 +23,8 @@ require_relative "lib/game_states/game_over"
 require_relative "lib/game_states/game_won"
 require_relative "lib/game_states/transition"
 
-HungryCatTwo::Window.new(resizable: true, width: 1280, height: 720).show
+if HungryCatTwo::DEBUG
+  HungryCatTwo::Window.new(resizable: true, width: 1280, height: 720).show
+else
+  HungryCatTwo::Window.new(width: Gosu.screen_width, height: Gosu.screen_height, fullscreen: true).show
+end

@@ -186,7 +186,7 @@ module HungryCatTwo
           end
 
           @entities.each(&:draw)
-          debug_draw
+          debug_draw if DEBUG
         end
       end
     end

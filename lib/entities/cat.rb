@@ -13,6 +13,11 @@ module HungryCatTwo
       @visible = true
 
       @last_touched_tile = nil
+
+      @sounds = {
+        stressed: @level.window.current_state.get_sample("#{ROOT_PATH}/media/sfx/stressed.ogg"),
+        eat: @level.window.current_state.get_sample("#{ROOT_PATH}/media/sfx/eat.ogg")
+      }
     end
 
     def draw
@@ -55,21 +60,22 @@ module HungryCatTwo
 
     def evade_dogs
       @level.dogs.find do |dog|
-        if @level.entity_vs_entity(self, dog)
-          edges = @level.colliding_edge(self, dog)
-          unless edges[:top] && @position.y <= dog.position.y + 4
-            lose_life
-          end
+        next unless @level.entity_vs_entity(self, dog)
 
-          @velocity.y = @jump
-          return true
-        end
+        edges = @level.colliding_edge(self, dog)
+        lose_life if (edges[:left] || edges[:right]) && @position.y >= dog.position.y
+
+        @velocity.y = @jump
+        return true
       end
     end
 
     def collect_tacos
       @level.tacos.each do |taco|
-        @level.eat_taco(taco) if @level.entity_vs_entity(self, taco)
+        next unless @level.entity_vs_entity(self, taco)
+
+        @level.eat_taco(taco)
+        @sounds[:eat].play(0.5)
       end
     end
 
@@ -99,6 +105,8 @@ module HungryCatTwo
       @last_lost_life = Gosu.milliseconds
       @last_flash_at = Gosu.milliseconds
       @visible = false
+
+      @sounds[:stressed].play(0.25) unless die?
     end
 
     def die?
