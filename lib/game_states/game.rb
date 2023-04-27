@@ -39,13 +39,6 @@ module HungryCatTwo
       next_level?
     end
 
-    def debug_draw
-      if @debug
-        @context.draw_level_boxes(@current_level)
-        @context.draw_sprite_box(@cat.sprite, @cat.position.x, @cat.position.y)
-      end
-    end
-
     def next_level?
       return unless @level.tacos.size.zero? && @level.entity_vs_entity(@level.cat, @level.flag)
 

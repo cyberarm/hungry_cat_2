@@ -14,14 +14,17 @@ module HungryCatTwo
     sheet_image = Gosu::Image.new("#{ROOT_PATH}/media/spritesheet.png", retro: true)
     blob = sheet_image.to_blob
     i = 0
-    SPRITE_BOUNDING_BOXES = SPRITESHEET.map do
-      box = CyberarmEngine::BoundingBox.new
-      offset = TILE_SIZE * TILE_SIZE * i
-      width = sheet_image.width
+    # FIXME: Save 400+ ms by generating bounding boxes from sheet_image blob instead of for each sprite image...
+    SPRITE_BOUNDING_BOXES = SPRITESHEET.map do |sprite|
+      box = CyberarmEngine::BoundingBox.new(CyberarmEngine::Vector.new(TILE_SIZE, TILE_SIZE), CyberarmEngine::Vector.new(0, 0))
+      # offset = 15 * 15 * i
+      # width = sheet_image.width
+      offset = 0
+      blob = sprite.to_blob
 
       TILE_SIZE.times do |y|
         TILE_SIZE.times do |x|
-          next unless blob[offset + (y * width + x) * 4 + 3].ord.positive?
+          next unless blob[(offset + (TILE_SIZE * y + x)) * 4 + 3].ord > 0
 
           box.min.x = x if x < box.min.x
           box.min.y = y if y < box.min.y
@@ -32,6 +35,9 @@ module HungryCatTwo
       end
 
       i += 1
+
+      box.max.x += 1
+      box.max.y += 1
 
       box
     end.freeze
@@ -148,22 +154,6 @@ module HungryCatTwo
       @replay
     end
 
-    def draw
-      Gosu.draw_rect(0, 0, @window.width, @window.height, 0xff_252525, 0)
-
-      Gosu.scale(@window.scale, @window.scale, @window.width / 2, @window.height / 2) do
-        Gosu.translate(-@offset.x, -@offset.y) do
-          @height.times do |y|
-            @width.times do |x|
-              SPRITESHEET[tile(x, y)].draw(x * TILE_SIZE, y * TILE_SIZE, 1)
-            end
-          end
-
-          @entities.each(&:draw)
-        end
-      end
-    end
-
     def update(dt)
       replay! if Gosu.button_down?(Gosu::KB_R) && !replay?
       if Gosu.button_down?(Gosu::KB_F5)
@@ -182,6 +172,71 @@ module HungryCatTwo
       CyberarmEngine::Stats.frame.end_timing(:custom_physics_timestep)
 
       center_around(cat)
+    end
+
+    def draw
+      Gosu.draw_rect(0, 0, @window.width, @window.height, 0xff_252525, 0)
+
+      Gosu.scale(@window.scale, @window.scale, @window.width / 2, @window.height / 2) do
+        Gosu.translate(-@offset.x, -@offset.y) do
+          @height.times do |y|
+            @width.times do |x|
+              SPRITESHEET[tile(x, y)].draw(x * TILE_SIZE, y * TILE_SIZE, 1)
+            end
+          end
+
+          @entities.each(&:draw)
+          debug_draw
+        end
+      end
+    end
+
+    def debug_draw
+      @height.times do |y|
+        @width.times do |x|
+          tile = tile(x, y)
+
+          next if tile == -1
+
+          draw_bounding_box(tile, CyberarmEngine::Vector.new(x, y) * TILE_SIZE)
+        end
+      end
+
+      @entities.each { |e| draw_bounding_box(e.sprite, e.position) }
+    end
+
+    def draw_bounding_box(sprite_id, position)
+      box = SPRITE_BOUNDING_BOXES[sprite_id]
+
+      return unless box
+
+      # TOP
+      Gosu.draw_line(
+        box.min.x + position.x, box.min.y + position.y, Gosu::Color::RED,
+        box.min.x + position.x + box.width, box.min.y + position.y, Gosu::Color::RED,
+        Float::INFINITY
+      )
+
+      # RIGHT
+      Gosu.draw_line(
+        box.min.x + position.x + box.width, box.min.y + position.y, Gosu::Color::RED,
+        box.min.x + position.x + box.width, box.min.y + position.y + box.height, Gosu::Color::RED,
+        Float::INFINITY
+      )
+
+      # BOTTOM
+      Gosu.draw_line(
+        box.min.x + position.x + box.width, box.min.y + position.y + box.height, Gosu::Color::RED,
+        box.min.x + position.x, box.min.y + position.y + box.height, Gosu::Color::RED,
+        Float::INFINITY
+      )
+
+      # LEFT
+      Gosu.draw_line(
+        box.min.x + position.x, box.min.y + position.y + box.height, Gosu::Color::RED,
+        box.min.x + position.x, box.min.y + position.y, Gosu::Color::RED,
+        Float::INFINITY
+      )
     end
 
     # REF: https://gafferongames.com/post/fix_your_timestep/

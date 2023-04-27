@@ -1,6 +1,7 @@
 module HungryCatTwo
   class Entity
     GRAVITY = 9.8
+    MIN_VELOCITY = 0.05
 
     attr_reader :position, :velocity, :speed, :sprites, :base_sprite
     def initialize(level:, x: 0, y: 0, z: 0, speed: 10.0, base_sprite: 0)
@@ -79,10 +80,10 @@ module HungryCatTwo
         @position.y -= @velocity.y
 
         @velocity.x *= @drag
-        @velocity.x = 0 if @velocity.x.abs < 0.05
+        @velocity.x = 0 if @velocity.x.abs < MIN_VELOCITY
 
         if on_ground?
-          @position.y = ground.position.y - 15
+          @position.y = ground.position.y - Level::TILE_SIZE
           @velocity.y = 0
         else
           @velocity.y -= GRAVITY * dt
@@ -106,7 +107,7 @@ module HungryCatTwo
     def on_ground?
       return false unless (floor = ground)
 
-      @position.y >= floor.position.y - 15
+      @position.y >= floor.position.y - Level::TILE_SIZE
     end
 
     def ground(ground_sprite_start = 56, ground_sprite_end = 58)
@@ -115,8 +116,11 @@ module HungryCatTwo
 
     def collision_detector
       ground_tiles = [56, 57, 58]
+      pos = @position + CyberarmEngine::Vector.new(0, 1) # project down 1 pixel so that box will intersect terrain
 
-      @collisions = @level.sprite_vs_level(sprite, @position).select do |collision|
+      # FIXME: Check that bounding boxes are calculated correctly.
+      #        Transitioning to moving from idle sprite causes a cyclic fall while moving.
+      @collisions = @level.sprite_vs_level(sprite, pos).select do |collision|
         collision.sprite.between?(ground_tiles.first, ground_tiles.last)
       end
     end
