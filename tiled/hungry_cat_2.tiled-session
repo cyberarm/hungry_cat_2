@@ -3,8 +3,9 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "level_5.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
         "level_1.tmx": {
@@ -38,6 +39,17 @@
                 "x": 747.6874003189795,
                 "y": 129.63317384370015
             }
+        },
+        "level_5.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1601.6666666666665,
+                "y": 38
+            }
+        },
+        "spritesheet.tsx": {
+            "scaleInDock": 1
         }
     },
     "map.fixedSize": true,
@@ -46,8 +58,16 @@
     "map.tileWidth": 16,
     "map.width": 120,
     "openFiles": [
+        "level_2.tmx",
+        "level_3.tmx",
+        "level_4.tmx",
+        "level_5.tmx"
     ],
     "project": "hungry_cat_2.tiled-project",
     "recentFiles": [
+        "level_2.tmx",
+        "level_3.tmx",
+        "level_4.tmx",
+        "level_5.tmx"
     ]
 }
