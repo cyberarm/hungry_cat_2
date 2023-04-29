@@ -1,7 +1,17 @@
-begin
-  require_relative "../cyberarm_engine/lib/cyberarm_engine"
-rescue LoadError
-  require "cyberarm_engine"
+if RUBY_ENGINE == "mruby"
+  def require_relative(path)
+    require "./#{path}"
+  end
+
+  def warn(message)
+    puts message
+  end
+else
+  begin
+    require_relative "../cyberarm_engine/lib/cyberarm_engine"
+  rescue LoadError
+    require "cyberarm_engine"
+  end
 end
 
 require_relative "lib/window"

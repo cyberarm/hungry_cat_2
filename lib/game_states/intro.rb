@@ -41,8 +41,11 @@ module HungryCatTwo
       end
     end
 
-    def update
-      push_state(HungryCatGameTransition, current_level: 1, cat_lives: 3) if Level::JUMP_KEYS.any? { |key| Gosu.button_down?(key) }
+    def button_down(id)
+      super
+
+      push_state(HungryCatGameTransition, current_level: 1, cat_lives: 3) if Level::JUMP_KEYS.include?(id)
+      close if id == Gosu::KB_ESCAPE
     end
   end
 end

@@ -1,7 +1,7 @@
 module HungryCatTwo
   ROOT_PATH = File.expand_path("../..", __FILE__)
   DESIGN_RESOLUTION_WIDTH = 1080
-  DEBUG = ARGV.join.include?("--debug")
+  DEBUG = RUBY_ENGINE == "mruby" ? false : ARGV.join.include?("--debug")
 
   FONT = "#{ROOT_PATH}/media/fonts/Connection.otf".freeze
   BOLD_FONT = "#{ROOT_PATH}/media/fonts/ConnectionBold.otf".freeze
@@ -39,6 +39,7 @@ module HungryCatTwo
       super
 
       return unless id == Gosu::KB_TAB
+      return if RUBY_ENGINE == "mruby"
 
       @debug = !@debug
       self.show_stats_plotter = @debug

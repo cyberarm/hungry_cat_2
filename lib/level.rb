@@ -7,7 +7,7 @@ module HungryCatTwo
 
     CAT_HEAD = 27
 
-    JUMP_KEYS = [Gosu::KB_SPACE, Gosu::KB_W, Gosu::KB_UP, Gosu::GP_DPAD_UP]
+    JUMP_KEYS = [Gosu::KB_SPACE, Gosu::KB_W, Gosu::KB_UP] # , Gosu::GP_DPAD_UP
     LEFT_KEYS = [Gosu::KB_A, Gosu::KB_LEFT, Gosu::GP_LEFT]
     RIGHT_KEYS = [Gosu::KB_D, Gosu::KB_RIGHT, Gosu::GP_RIGHT]
 

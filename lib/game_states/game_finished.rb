@@ -17,11 +17,14 @@ module HungryCatTwo
 
         ratio = (time_elapsed / animation_time).clamp(0.0, 1.0)
         @offset = @end_position * ratio
-
-        # if @context.button?("y")
-        #   @context.game_state = HungryCatGameIntro.new(@context, current_level: 0)
-        # end
       end
+    end
+
+    def button_down(id)
+      super
+
+      push_state(HungryCatGameIntro) if Level::JUMP_KEYS.include?(id)
+      close if id == Gosu::KB_ESCAPE
     end
 
     def draw_animated_message(message)
