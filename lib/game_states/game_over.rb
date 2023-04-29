@@ -1,8 +1,14 @@
 module HungryCatTwo
   class HungryCatGameOver < HungryCatGameFinished
+    def setup
+      super
+
+      @message = "Here there be dragons..."
+    end
+
     def draw
       Gosu.draw_rect(0, 0, window.width, window.height, dark_purple)
-      # @context.text("Here there be dragons...", 0, 0, 11)
+      @font.draw_text(@message, window.width / 2 - @font.text_width(@message) / 2, Level::TILE_SIZE * 4, 11)
 
       Gosu.scale(window.scale, window.scale, window.width / 2, window.height / 2) do
         Level::SPRITESHEET[18].draw(window.width / 2 - 28, window.height / 2 - 8)

@@ -3,12 +3,13 @@ module HungryCatTwo
     GRAVITY = 9.8
     MIN_VELOCITY = 0.05
 
-    attr_reader :position, :velocity, :speed, :sprites, :base_sprite
+    attr_reader :position, :velocity, :last_position, :speed, :sprites, :base_sprite
     def initialize(level:, x: 0, y: 0, z: 0, speed: 10.0, base_sprite: 0)
       @level = level
       @speed = speed
       @position = CyberarmEngine::Vector.new(x, y, z)
       @velocity = CyberarmEngine::Vector.new(0, 0)
+      @last_position = CyberarmEngine::Vector.new(@position.x, @position.y)
 
       @base_sprite = base_sprite
 
@@ -68,12 +69,17 @@ module HungryCatTwo
       end
     end
 
-    def draw
-      Level::SPRITESHEET[sprite].draw(@position.x, @position.y, @position.z)
+    def draw(alpha)
+      # Don't lerp Taco here, it jerks if you do
+      lerp_pos = sprite == Level::TACO ? @position : @position * alpha + @last_position * (1.0 - alpha)
+
+      Level::SPRITESHEET[sprite].draw(lerp_pos.x, lerp_pos.y, @position.z)
     end
 
     def update(dt, input)
       collision_detector
+
+      @last_position = CyberarmEngine::Vector.new(@position.x, @position.y)
 
       unless @static
         @position.x += @velocity.x
@@ -115,14 +121,9 @@ module HungryCatTwo
     end
 
     def collision_detector
-      ground_tiles = [56, 57, 58]
       pos = @position + CyberarmEngine::Vector.new(0, 1) # project down 1 pixel so that box will intersect terrain
 
-      # FIXME: Check that bounding boxes are calculated correctly.
-      #        Transitioning to moving from idle sprite causes a cyclic fall while moving.
-      @collisions = @level.sprite_vs_level(sprite, pos).select do |collision|
-        collision.sprite.between?(ground_tiles.first, ground_tiles.last)
-      end
+      @collisions = @level.sprite_vs_level(sprite, pos)
     end
   end
 end

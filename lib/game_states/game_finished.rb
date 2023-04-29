@@ -7,6 +7,7 @@ module HungryCatTwo
       @end_position = 30
 
       @offset = 0
+      @font = Gosu::Font.new((16 * window.scale).ceil, name: FONT)
     end
 
     def update

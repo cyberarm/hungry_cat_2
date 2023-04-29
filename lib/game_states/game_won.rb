@@ -1,10 +1,18 @@
 module HungryCatTwo
   class HungryCatGameComplete < HungryCatGameFinished
+    def setup
+      super
+
+      @message = "Cat  fed  successfully."
+    end
+
     def draw
       Gosu.draw_rect(0, 0, window.width, window.height, dark_green)
-      # window.text("Cat feed successfully.", 0 , 0, 12)
+      @font.draw_text(@message, window.width / 2 - @font.text_width(@message) / 2, Level::TILE_SIZE * 4, 12)
 
-      # window.sprite(14, window.width / 2 - 8, window.height / 2 - 8)
+      Gosu.scale(window.scale, window.scale, window.width / 2, window.height / 2) do
+        Level::SPRITESHEET[14].draw(window.width / 2 - Level::TILE_SIZE / 2, window.height / 2 - Level::TILE_SIZE / 2, 10)
+      end
 
       draw_animated_message("Press 'Y' to play again.")
     end

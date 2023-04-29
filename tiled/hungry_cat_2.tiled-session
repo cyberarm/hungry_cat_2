@@ -16,11 +16,27 @@
             }
         },
         "level_2.tmx": {
-            "scale": 1.0944791666666667,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 480.59388978776053,
-                "y": 160.8070809936233
+                "x": 378.75,
+                "y": 167.5
+            }
+        },
+        "level_3.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 452.5,
+                "y": 86
+            }
+        },
+        "level_4.tmx": {
+            "scale": 0.9796874999999999,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 747.6874003189795,
+                "y": 129.63317384370015
             }
         }
     },
@@ -28,7 +44,7 @@
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
-    "map.width": 60,
+    "map.width": 120,
     "openFiles": [
     ],
     "project": "hungry_cat_2.tiled-project",

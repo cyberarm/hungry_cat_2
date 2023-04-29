@@ -6,30 +6,43 @@ module HungryCatTwo
       ]
 
       @cat_lives = 3
+
+      @font = Gosu::Font.new((16 * window.scale).ceil, name: BOLD_FONT)
+      @small_font = Gosu::Font.new((12 * window.scale).ceil, name: FONT)
+
+      @title = "Hungry Cat 2"
+      @instructions = "Feed Cattingo tacos, and stay away from the dogs.\nPress JUMP to begin."
+      @start_instructions = "Controls:\n"\
+                            "Left  → A, Left, Gamepad D-Left, and Gamepad Left Stick -X\n"\
+                            "Right → D, Right, Gamepad D-Right, and Gamepad Left Stick +X\n"\
+                            "Jump → Spacebar, W, Up, Gamepad D-Up, and Gamepad A"
     end
 
     def draw
-      @context.rect(0, 0, @context.width, @context.height, @context.light_gray)
-      @context.text("Hungry Cat", 32, 0, 12, 0 , @context.dark_gray)
-      @context.text("Press 'Y' to start", 30, 32, 8, 0, @context.black)
+      Gosu.draw_rect(0, 0, window.width, window.height, light_gray)
+      @font.draw_text(@title, window.width / 2 - @font.text_width(@title) / 2, 10 + @font.height,  10, 1.0, 1.0, dark_gray)
+      @small_font.draw_text(@instructions, window.width / 2 - @small_font.text_width(@instructions) / 2, 10 + @font.height * 2, 10, 1.0, 1.0, black)
 
-      @context.text("'X' -> X     'Y' -> C", 35, 56, 6, 0, @context.black)
-      @context.text("On US Keyboard", 42, 64, 6, 0, @context.black)
+      @small_font.draw_text(@start_instructions, window.width / 2 - @small_font.text_width(@start_instructions) / 2, window.height - (@small_font.height * 6 + 10), 10, 1.0, 1.0, black)
 
-      x = 0
-      @ground.each_with_index do |tile|
-        @context.sprite(tile, x, @context.height - 32)
-        x += 16
+      Gosu.scale(window.scale, window.scale, window.width / 2, window.height / 2) do
+        Gosu.translate(-Level::TILE_SIZE * @ground.size / 2, 0) do
+          x = 0
+          @ground.each do |tile|
+            Level::SPRITESHEET[tile].draw(x + window.width / 2, window.height * 0.5, 10)
+            x += Level::TILE_SIZE
+          end
+
+          Level::SPRITESHEET[14].draw(Level::TILE_SIZE * 1 + window.width / 2, window.height * 0.5 - Level::TILE_SIZE, 10)
+          Level::SPRITESHEET[00].draw(Level::TILE_SIZE * 3 + window.width / 2, window.height * 0.5 - Level::TILE_SIZE, 10)
+          Level::SPRITESHEET[42].draw(Level::TILE_SIZE * 4 + window.width / 2, window.height * 0.5 - Level::TILE_SIZE, 10)
+          Level::SPRITESHEET[49].draw(Level::TILE_SIZE * 6 + window.width / 2, window.height * 0.5 - Level::TILE_SIZE, 10)
+        end
       end
-
-      @context.sprite(14, 16 * 1, @context.height - 47)
-      @context.sprite(42, 16 * 4, @context.height - 47)
-      @context.sprite(00, 16 * 3, @context.height - 47)
-      @context.sprite(49, 16 * 6, @context.height - 47)
     end
 
     def update
-      @context.game_state = HungryCatGameTransition.new(@context, current_level: @options[:current_level], cat_lives: @cat_lives) if @context.button?("y")
+      push_state(HungryCatGameTransition, current_level: 1, cat_lives: 3) if Level::JUMP_KEYS.any? { |key| Gosu.button_down?(key) }
     end
   end
 end

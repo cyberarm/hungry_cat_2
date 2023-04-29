@@ -2,7 +2,7 @@ module HungryCatTwo
   class Cat < Entity
     def setup
       @lives = 0
-      @jump = 4.0
+      @jump = 2.75
       @direction = -1
 
       @invincible_time = 1000
@@ -12,7 +12,7 @@ module HungryCatTwo
       @last_flash_at = Gosu.milliseconds - @flash_time
       @visible = true
 
-      @last_touched_tile = nil
+      @last_touched_position = nil
 
       @sounds = {
         stressed: @level.window.current_state.get_sample("#{ROOT_PATH}/media/sfx/stressed.ogg"),
@@ -20,11 +20,11 @@ module HungryCatTwo
       }
     end
 
-    def draw
+    def draw(alpha)
       if Gosu.milliseconds > @last_lost_life + @invincible_time
         super
-      else
-        super if flash
+      elsif flash
+        super
       end
     end
 
@@ -40,8 +40,7 @@ module HungryCatTwo
 
       @velocity.y = @jump if input.jump? && on_ground?
 
-      tile = ground
-      @last_touched_tile = ground if tile
+      @last_touched_position = CyberarmEngine::Vector.new(@position.x, @position.y) if ground
 
       evade_dogs
       collect_tacos
@@ -80,12 +79,14 @@ module HungryCatTwo
     end
 
     def fell_out_of_level?
-      if @position.y > @level.lowest_point + @level.window.height
-        @position.y = @last_touched_tile.position.y - (16 * @jump)
-        @velocity.y = 0
+      return unless @position.y > @level.lowest_point + Level::TILE_SIZE * 8
 
-        lose_life
-      end
+      @position.x = @last_touched_position.x
+      @position.y = @last_touched_position.y - (Level::TILE_SIZE * @jump)
+      @velocity.x = 0
+      @velocity.y = 0
+
+      lose_life
     end
 
     def flash
@@ -110,7 +111,7 @@ module HungryCatTwo
     end
 
     def die?
-      @lives <= 0
+      @lives < 1
     end
   end
 end

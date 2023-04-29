@@ -7,6 +7,10 @@ module HungryCatTwo
 
     CAT_HEAD = 27
 
+    JUMP_KEYS = [Gosu::KB_SPACE, Gosu::KB_W, Gosu::KB_UP, Gosu::GP_DPAD_UP]
+    LEFT_KEYS = [Gosu::KB_A, Gosu::KB_LEFT, Gosu::GP_LEFT]
+    RIGHT_KEYS = [Gosu::KB_D, Gosu::KB_RIGHT, Gosu::GP_RIGHT]
+
     TILE_SIZE = 16
     SPRITESHEET = Gosu::Image.load_tiles("#{ROOT_PATH}/media/spritesheet.png", TILE_SIZE, TILE_SIZE, retro: true).freeze
 
@@ -43,8 +47,9 @@ module HungryCatTwo
     end.freeze
 
     FIXED_TIMESTEP = 1.0 / 120
+    MAX_TIMESTEP   = 1.0 / 60
 
-    Collision = Struct.new(:sprite, :position)
+    Tile = Struct.new(:sprite, :position)
 
     attr_reader :window, :lowest_point
 
@@ -66,6 +71,7 @@ module HungryCatTwo
 
       @accumulator = 0.0
       @interpolation = 0.0
+      @alpha = 1.0
 
       @lowest_point = 0
 
@@ -100,7 +106,7 @@ module HungryCatTwo
 
           @lowest_point = @height * TILE_SIZE if i.positive?
 
-          @tiles << i
+          @tiles << Tile.new(i, CyberarmEngine::Vector.new(index * TILE_SIZE, @height * TILE_SIZE)) if [56, 57, 58].include?(i) # ground tiles
         end
 
         @width = list.size
@@ -116,7 +122,7 @@ module HungryCatTwo
       warn "No dogs to dodge!" unless dogs.size.positive?
     end
 
-    def center_around(entity, lag = CyberarmEngine::Vector.new(0.85, 0.85))
+    def center_around(entity, lag = CyberarmEngine::Vector.new(0.95, 0.98))
       @offset.x += ((entity.position.x - @window.width  / 2) - @offset.x) * (1.0 - lag.x)
       @offset.y += ((entity.position.y - @window.height / 2) - @offset.y) * (1.0 - lag.y)
     end
@@ -163,9 +169,9 @@ module HungryCatTwo
       end
 
       input = Input.new
-      input.jump = [Gosu::KB_SPACE, Gosu::KB_W, Gosu::KB_UP, Gosu::GP_DPAD_UP].any? { |key| Gosu.button_down?(key) }
-      input.left = [Gosu::KB_A, Gosu::KB_LEFT, Gosu::GP_LEFT].any? { |key| Gosu.button_down?(key) }
-      input.right = [Gosu::KB_D, Gosu::KB_RIGHT, Gosu::GP_RIGHT].any? { |key| Gosu.button_down?(key) }
+      input.jump  = JUMP_KEYS.any?  { |key| Gosu.button_down?(key) }
+      input.left  = LEFT_KEYS.any?  { |key| Gosu.button_down?(key) }
+      input.right = RIGHT_KEYS.any? { |key| Gosu.button_down?(key) }
 
       CyberarmEngine::Stats.frame.start_timing(:custom_physics_timestep)
       physics(dt, input)
@@ -179,27 +185,19 @@ module HungryCatTwo
 
       Gosu.scale(@window.scale, @window.scale, @window.width / 2, @window.height / 2) do
         Gosu.translate(-@offset.x, -@offset.y) do
-          @height.times do |y|
-            @width.times do |x|
-              SPRITESHEET[tile(x, y)].draw(x * TILE_SIZE, y * TILE_SIZE, 1)
-            end
+          @tiles.each do |tile|
+            SPRITESHEET[tile.sprite].draw(tile.position.x, tile.position.y, 1)
           end
 
-          @entities.each(&:draw)
-          debug_draw if DEBUG
+          @entities.each { |e| e.draw(@alpha) }
+          debug_draw if @window.debug
         end
       end
     end
 
     def debug_draw
-      @height.times do |y|
-        @width.times do |x|
-          tile = tile(x, y)
-
-          next if tile == -1
-
-          draw_bounding_box(tile, CyberarmEngine::Vector.new(x, y) * TILE_SIZE)
-        end
+      @tiles.each do |tile|
+        draw_bounding_box(tile.sprite, tile.position)
       end
 
       @entities.each { |e| draw_bounding_box(e.sprite, e.position) }
@@ -241,7 +239,7 @@ module HungryCatTwo
 
     # REF: https://gafferongames.com/post/fix_your_timestep/
     def physics(dt, input)
-      dt = 0.1 if dt > 0.1
+      dt = MAX_TIMESTEP if dt > MAX_TIMESTEP
       @accumulator += dt
 
       while @accumulator >= FIXED_TIMESTEP
@@ -257,12 +255,14 @@ module HungryCatTwo
           @inputs << input != @inputs.last ? input : nil
         end
 
+        @alpha = @accumulator / FIXED_TIMESTEP
+
         @entities.each { |e| e.update(FIXED_TIMESTEP, input) }
       end
     end
 
     def tile(x, y)
-      @tiles[@width * y + x]
+      @tiles.find { |t| t.position.x.floor / TILE_SIZE == x && t.position.y.floor / TILE_SIZE == y }
     end
 
     def sprite_vs_level(sprite_id, position)
@@ -273,20 +273,14 @@ module HungryCatTwo
       )
 
       collisions = []
-      @height.times do |y|
-        @width.times do |x|
-          tile = tile(x, y)
-          next unless tile.positive? # Using -1 for "air"
+      @tiles.each do |tile|
+        other_box = SPRITE_BOUNDING_BOXES[tile.sprite]
+        other_box = CyberarmEngine::BoundingBox.new(
+          other_box.min + tile.position,
+          other_box.max + tile.position
+        )
 
-          v = CyberarmEngine::Vector.new(x * TILE_SIZE, y * TILE_SIZE)
-          other_box = SPRITE_BOUNDING_BOXES[tile]
-          other_box = CyberarmEngine::BoundingBox.new(
-            other_box.min + v,
-            other_box.max + v
-          )
-
-          collisions << Collision.new(tile, v) if sprite_box.intersect?(other_box)
-        end
+        collisions << tile if sprite_box.intersect?(other_box)
       end
 
       collisions

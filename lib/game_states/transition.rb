@@ -9,7 +9,7 @@ module HungryCatTwo
       @current_level = @options[:current_level]
       @new_level = Game.new(current_level: @current_level, cat_lives: @options[:cat_lives])
 
-      @font = Gosu::Font.new((16 * window.scale).ceil)
+      @font = Gosu::Font.new((16 * window.scale).ceil, name: FONT)
     end
 
     def draw

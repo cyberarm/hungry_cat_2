@@ -30,7 +30,7 @@ module HungryCatTwo
     def ground_ahead?
       x = @velocity.x.positive? ? @position.x.floor / Level::TILE_SIZE + 1 : @position.x.floor / Level::TILE_SIZE
 
-      @level.tile(x, position.y.floor / Level::TILE_SIZE + 1) != -1
+      @level.tile(x, position.y.floor / Level::TILE_SIZE + 1)
     end
   end
 end
