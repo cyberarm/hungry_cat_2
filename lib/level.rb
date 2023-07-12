@@ -47,11 +47,12 @@ module HungryCatTwo
     end.freeze
 
     FIXED_TIMESTEP = 1.0 / 120
+    FIXED_TIMESTEP_INT_MS = 8
     MAX_TIMESTEP   = 1.0 / 60
 
     Tile = Struct.new(:sprite, :position)
 
-    attr_reader :window, :lowest_point
+    attr_reader :window, :lowest_point, :milliseconds
 
     def initialize(tmx:, cat_lives:)
       @width = 0
@@ -68,6 +69,8 @@ module HungryCatTwo
       @replay_frame = 0
 
       @window = CyberarmEngine::Window.instance
+
+      @milliseconds = 0
 
       @accumulator = 0.0
       @interpolation = 0.0
@@ -148,6 +151,7 @@ module HungryCatTwo
     end
 
     def replay!
+      @milliseconds = 0
       @replay_frame = 0
       @entities = []
       @original_entities.each { |e| @entities << e.class.new(level: self, x: e.position.x, y: e.position.y, base_sprite: e.base_sprite) }
@@ -247,7 +251,8 @@ module HungryCatTwo
 
         if replay?
           input = @inputs[@replay_frame]
-          input ||= Input.new
+          return unless input
+          # input ||= Input.new
 
           # puts "REPLAY: #{@replay_frame}: #{input}"
           @replay_frame += 1
@@ -257,6 +262,7 @@ module HungryCatTwo
 
         @alpha = @accumulator / FIXED_TIMESTEP
 
+        @milliseconds += FIXED_TIMESTEP_INT_MS
         @entities.each { |e| e.update(FIXED_TIMESTEP, input) }
       end
     end

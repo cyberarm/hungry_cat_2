@@ -6,10 +6,10 @@ module HungryCatTwo
       @direction = -1
 
       @invincible_time = 1000
-      @last_lost_life = Gosu.milliseconds - @invincible_time
+      @last_lost_life = milliseconds - @invincible_time
 
       @flash_time = 75
-      @last_flash_at = Gosu.milliseconds - @flash_time
+      @last_flash_at = milliseconds - @flash_time
       @visible = true
 
       @last_touched_position = nil
@@ -21,7 +21,7 @@ module HungryCatTwo
     end
 
     def draw(alpha)
-      if Gosu.milliseconds > @last_lost_life + @invincible_time
+      if milliseconds > @last_lost_life + @invincible_time
         super
       elsif flash
         super
@@ -90,8 +90,8 @@ module HungryCatTwo
     end
 
     def flash
-      if Gosu.milliseconds > @last_flash_at + @flash_time
-        @last_flash_at = Gosu.milliseconds
+      if milliseconds > @last_flash_at + @flash_time
+        @last_flash_at = milliseconds
 
         @visible = !@visible
       end
@@ -100,11 +100,11 @@ module HungryCatTwo
     end
 
     def lose_life
-      return unless Gosu.milliseconds > @last_lost_life + @invincible_time
+      return unless milliseconds > @last_lost_life + @invincible_time
 
       @lives -= 1
-      @last_lost_life = Gosu.milliseconds
-      @last_flash_at = Gosu.milliseconds
+      @last_lost_life = milliseconds
+      @last_flash_at = milliseconds
       @visible = false
 
       @sounds[:stressed].play(0.25) unless die?

@@ -13,7 +13,7 @@ module HungryCatTwo
     end
 
     def update(dt, input)
-      @offset = Math.cos(Gosu.milliseconds / @limiter) * @offset_range
+      @offset = Math.cos(milliseconds / @limiter) * @offset_range
       @position.y += @offset
     end
   end

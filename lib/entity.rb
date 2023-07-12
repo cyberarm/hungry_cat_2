@@ -32,7 +32,7 @@ module HungryCatTwo
 
       @animation_index = 0
       @frame_time = 100
-      @last_frame = Gosu.milliseconds
+      @last_frame = milliseconds
 
       @collisions = []
 
@@ -40,6 +40,10 @@ module HungryCatTwo
     end
 
     def setup
+    end
+
+    def milliseconds
+      @level.milliseconds
     end
 
     def sprite
@@ -102,8 +106,8 @@ module HungryCatTwo
     end
 
     def animate
-      if Gosu.milliseconds >= @last_frame + @frame_time
-        @last_frame = Gosu.milliseconds
+      if milliseconds >= @last_frame + @frame_time
+        @last_frame = milliseconds
 
         @animation_index += 1
         @animation_index = 0 if @animation_index > @sprites[current_action].size - 1
